@@ -1,15 +1,15 @@
 import cv2 as cv
 import numpy as np
 import matplotlib.pyplot as plt
-import os
-import logging
-from concurrent.futures import ThreadPoolExecutor
-from typing import List, Tuple, Optional
-from tqdm import tqdm  # Importamos tqdm para la barra de progreso
+import os # Permite interactuar con el sistema operativo
+import logging # Proporciona herramientas para registrar mensajes, advertencias y errores en tu aplicación
+from concurrent.futures import ThreadPoolExecutor  # Permite ejecutar tareas en paralelo utilizando múltiples hilos
+from typing import List, Tuple, Optional  # Anotaciones de tipo en Python la cual es útil para mejorar la legibilidad del código
+from tqdm import tqdm  # Baras visuales de carga
 import json  # Importamos json a nivel global
 
 # Configuracion para el procesamiento de imagenes.
-class ImageProcessorConfig:
+class ImageProcessorConfig:   # Clase base que define configuracion que se aplicaran a las imagenes al procesar cada imagen
     def __init__(self, median_blur_ksize=5, adaptive_thresh_blocksize=11, adaptive_thresh_C=2, defect_area_threshold=100):
         self.median_blur_ksize = median_blur_ksize
         self.adaptive_thresh_blocksize = adaptive_thresh_blocksize
@@ -17,16 +17,16 @@ class ImageProcessorConfig:
         self.defect_area_threshold = defect_area_threshold
 
 class ImageProcessor:
-    def __init__(self, config: ImageProcessorConfig, image_paths: Optional[List[str]] = None):
+    def __init__(self, config: ImageProcessorConfig, image_paths: Optional[List[str]] = None): # Agarra la configuracion y la ruta de las imagenes seleccionadas
         # Inicializa el procesador de imagenes con una configuracion y una lista de rutas de imagenes.
-        self.config = config
+        self.config = config  
         self.image_paths = image_paths or []
         self.images = []
         self.processed_images = []
         self.logger = self._setup_logger()
         self.logger.info("ImageProcessor inicializado.")
 
-    def _setup_logger(self):
+    def _setup_logger(self): # Configura un sistema de registro (logger) que guarda los mensajes como exitoso, falla, etc. (Meramente informativo)
         logger = logging.getLogger('ImageProcessor')
         logger.setLevel(logging.INFO)
         if not logger.handlers:
@@ -35,7 +35,7 @@ class ImageProcessor:
             logger.addHandler(handler)
         return logger
 
-    def load_images(self):
+    def load_images(self): # Se cambian todas las imagenes proporcionadas en el constructor y se guarda en la lista de imagenes procesadas
         # Carga imagenes en escala de grises desde las rutas proporcionadas.
         self.images = []
         for path in self.image_paths:
@@ -51,7 +51,7 @@ class ImageProcessor:
         if not self.images:
             self.logger.error("No se cargaron imagenes validas.")
 
-    def add_image_path(self, path: str):
+    def add_image_path(self, path: str): # Permite añadir mas imagenes a la lista
         # Anade una ruta de imagen a la lista de imagenes a procesar.
         if os.path.isfile(path):
             if path not in self.image_paths:
@@ -62,8 +62,7 @@ class ImageProcessor:
         else:
             self.logger.warning(f"Ruta no valida: {path}")
 
-    def add_images_from_directory(self, directory: str, extensions: Optional[List[str]] = None):
-        # Anade todas las imagenes de un directorio a la lista de imagenes a procesar.
+    def add_images_from_directory(self, directory: str, extensions: Optional[List[str]] = None): # Anade todas las imagenes de un directorio a la lista de imagenes a procesar.
         if not os.path.isdir(directory):
             self.logger.warning(f"Directorio no valido: {directory}")
             return
@@ -74,16 +73,13 @@ class ImageProcessor:
                     full_path = os.path.join(root, file)
                     self.add_image_path(full_path)
 
-    def apply_spatial_filter(self, image: np.ndarray) -> np.ndarray:
-        # Aplica un filtro espacial (filtro de mediana) a la imagen.
+    def apply_spatial_filter(self, image: np.ndarray) -> np.ndarray: # Aplica un filtro espacial (filtro de mediana) a la imagen.
         return cv.medianBlur(image, self.config.median_blur_ksize)
 
-    def apply_equalization(self, image: np.ndarray) -> np.ndarray:
-        # Aplica ecualizacion de histograma a la imagen.
+    def apply_equalization(self, image: np.ndarray) -> np.ndarray: # Aplica ecualizacion de histograma a la imagen.
         return cv.equalizeHist(image)
 
-    def apply_thresholding(self, image: np.ndarray) -> np.ndarray:
-        # Aplica umbralizacion adaptativa a la imagen.
+    def apply_thresholding(self, image: np.ndarray) -> np.ndarray: # Aplica umbralizacion adaptativa a la imagen.
         return cv.adaptiveThreshold(
             image,
             255,
@@ -93,8 +89,7 @@ class ImageProcessor:
             self.config.adaptive_thresh_C
         )
 
-    def detect_defects(self, image: np.ndarray) -> List[np.ndarray]:
-        # Detecta defectos en la imagen procesada.
+    def detect_defects(self, image: np.ndarray) -> List[np.ndarray]: # Detecta defectos en la imagen procesada.
         contours, _ = cv.findContours(
             image, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE
         )
@@ -105,8 +100,7 @@ class ImageProcessor:
                 defects.append(contour)
         return defects
 
-    def process_single_image(self, image_info: dict) -> dict:
-        # Procesa una sola imagen y devuelve los resultados.
+    def process_single_image(self, image_info: dict) -> dict: # Procesa una sola imagen y devuelve los resultados.
         path = image_info['path']
         image = image_info['image']
         try:
@@ -130,15 +124,13 @@ class ImageProcessor:
                 'defects': []
             }
 
-    def process_images(self):
-        # Procesa todas las imagenes cargadas utilizando hilos para mejorar el rendimiento.
+    def process_images(self): # Procesa todas las imagenes cargadas utilizando hilos para mejorar el rendimiento.
         self.processed_images = []
         with ThreadPoolExecutor() as executor:
             results = list(tqdm(executor.map(self.process_single_image, self.images), total=len(self.images), desc='Procesando imagenes'))
             self.processed_images = results
 
-    def save_images(self, output_dir: str):
-        # Guarda las imagenes procesadas en el directorio especificado.
+    def save_images(self, output_dir: str): # Guarda las imagenes procesadas en el directorio especificado.
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
             self.logger.info(f"Directorio creado: {output_dir}")
@@ -153,8 +145,7 @@ class ImageProcessor:
                 else:
                     self.logger.error(f"Error al guardar la imagen procesada: {output_path}")
 
-    def generate_defect_report(self) -> List[dict]:
-        # Genera un informe de defectos detectados en cada imagen.
+    def generate_defect_report(self) -> List[dict]: # Genera un informe de defectos detectados en cada imagen.
         report = []
         for data in self.processed_images:
             num_defects = len(data['defects'])
@@ -166,8 +157,7 @@ class ImageProcessor:
             self.logger.info(f"Imagen: {data['path']}, Defectos detectados: {num_defects}")
         return report
 
-    def save_defect_report(self, output_file: str):
-        # Guarda el informe de defectos en un archivo JSON.
+    def save_defect_report(self, output_file: str): # Guarda el informe de defectos en un archivo JSON.
         report = self.generate_defect_report()
         output_dir = os.path.dirname(output_file)
         if output_dir and not os.path.exists(output_dir):
@@ -180,8 +170,7 @@ class ImageProcessor:
         except Exception as e:
             self.logger.error(f"Error al guardar el informe de defectos: {e}")
 
-    def display_images(self):
-        # Muestra las imagenes originales y procesadas, incluyendo defectos detectados.
+    def display_images(self): # Muestra las imagenes originales y procesadas, incluyendo defectos detectados.
         for data in self.processed_images:
             original = data['original']
             processed = data['processed']
@@ -210,14 +199,12 @@ class ImageProcessor:
 
             plt.show()
 
-    def clear_data(self):
-        # Limpia las listas de imagenes cargadas y procesadas.
+    def clear_data(self): # Limpia las listas de imagenes cargadas y procesadas.
         self.images = []
         self.processed_images = []
         self.logger.info("Datos de imagenes limpiados.")
 
-    def set_config(self, config: ImageProcessorConfig):
-        # Actualiza la configuracion del procesador de imagenes.
+    def set_config(self, config: ImageProcessorConfig): # Actualiza la configuracion del procesador de imagenes.
         self.config = config
         self.logger.info("Configuracion actualizada.")
 
