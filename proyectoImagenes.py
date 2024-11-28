@@ -26,6 +26,10 @@ class ImageProcessor:
         self.logger = self._setup_logger()
         self.logger.info("ImageProcessor inicializado.")
 
+    """
+    Hace una lista con logging para que si hay error, solo mande mensaje y no se detenga el programa
+    """
+
     def _setup_logger(self): # Configura un sistema de registro (logger) que guarda los mensajes como exitoso, falla, etc. (Meramente informativo)
         logger = logging.getLogger('ImageProcessor')
         logger.setLevel(logging.INFO)
@@ -34,6 +38,10 @@ class ImageProcessor:
             handler.setFormatter(logging.Formatter('%(levelname)s: %(message)s'))
             logger.addHandler(handler)
         return logger
+
+    """
+    Carga las imagenes
+    """
 
     def load_images(self): # Se cambian todas las imagenes proporcionadas en el constructor y se guarda en la lista de imagenes procesadas
         # Carga imagenes en escala de grises desde las rutas proporcionadas.
@@ -51,6 +59,10 @@ class ImageProcessor:
         if not self.images:
             self.logger.error("No se cargaron imagenes validas.")
 
+    """
+    Añade una ruta de imagen
+    """
+
     def add_image_path(self, path: str): # Permite añadir mas imagenes a la lista
         # Anade una ruta de imagen a la lista de imagenes a procesar.
         if os.path.isfile(path):
@@ -61,6 +73,10 @@ class ImageProcessor:
                 self.logger.info(f"La ruta ya existe en la lista: {path}")
         else:
             self.logger.warning(f"Ruta no valida: {path}")
+
+    """
+    Añade imagenes del directorio
+    """
 
     def add_images_from_directory(self, directory: str, extensions: Optional[List[str]] = None): # Anade todas las imagenes de un directorio a la lista de imagenes a procesar.
         if not os.path.isdir(directory):
@@ -73,11 +89,23 @@ class ImageProcessor:
                     full_path = os.path.join(root, file)
                     self.add_image_path(full_path)
 
+    """
+    Aplica un filtro espacial (filtro de mediana) a la imagen.
+    """
+    
     def apply_spatial_filter(self, image: np.ndarray) -> np.ndarray: # Aplica un filtro espacial (filtro de mediana) a la imagen.
         return cv.medianBlur(image, self.config.median_blur_ksize)
 
+    """
+    Aplica ecualización de histograma a la imagen.
+    """
+
     def apply_equalization(self, image: np.ndarray) -> np.ndarray: # Aplica ecualizacion de histograma a la imagen.
         return cv.equalizeHist(image)
+
+    """
+    Aplica umbralización adaptativa a la imagen.
+    """
 
     def apply_thresholding(self, image: np.ndarray) -> np.ndarray: # Aplica umbralizacion adaptativa a la imagen.
         return cv.adaptiveThreshold(
@@ -89,6 +117,10 @@ class ImageProcessor:
             self.config.adaptive_thresh_C
         )
 
+    """
+    Detecta defectos en la imagen procesada.
+    """
+
     def detect_defects(self, image: np.ndarray) -> List[np.ndarray]: # Detecta defectos en la imagen procesada.
         contours, _ = cv.findContours(
             image, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE
@@ -99,6 +131,10 @@ class ImageProcessor:
             if area < self.config.defect_area_threshold:
                 defects.append(contour)
         return defects
+
+    """
+    Procesa una sola imagen y devuelve los resultados.
+    """
 
     def process_single_image(self, image_info: dict) -> dict: # Procesa una sola imagen y devuelve los resultados.
         path = image_info['path']
@@ -124,11 +160,19 @@ class ImageProcessor:
                 'defects': []
             }
 
+    """
+    Procesa todas las imágenes cargadas utilizando hilos para mejorar el rendimiento.
+    """
+
     def process_images(self): # Procesa todas las imagenes cargadas utilizando hilos para mejorar el rendimiento.
         self.processed_images = []
         with ThreadPoolExecutor() as executor:
             results = list(tqdm(executor.map(self.process_single_image, self.images), total=len(self.images), desc='Procesando imagenes'))
             self.processed_images = results
+
+    """
+    Guarda las imágenes procesadas en el directorio especificado.
+    """
 
     def save_images(self, output_dir: str): # Guarda las imagenes procesadas en el directorio especificado.
         if not os.path.exists(output_dir):
@@ -144,6 +188,10 @@ class ImageProcessor:
                     self.logger.info(f"Imagen procesada guardada: {output_path}")
                 else:
                     self.logger.error(f"Error al guardar la imagen procesada: {output_path}")
+    
+    """
+    Genera un informe de defectos detectados en cada imagen.
+    """
 
     def generate_defect_report(self) -> List[dict]: # Genera un informe de defectos detectados en cada imagen.
         report = []
@@ -157,6 +205,10 @@ class ImageProcessor:
             self.logger.info(f"Imagen: {data['path']}, Defectos detectados: {num_defects}")
         return report
 
+    """
+    Guarda el informe de defectos en un archivo JSON.
+    """
+
     def save_defect_report(self, output_file: str): # Guarda el informe de defectos en un archivo JSON.
         report = self.generate_defect_report()
         output_dir = os.path.dirname(output_file)
@@ -169,6 +221,10 @@ class ImageProcessor:
             self.logger.info(f"Informe de defectos guardado en: {output_file}")
         except Exception as e:
             self.logger.error(f"Error al guardar el informe de defectos: {e}")
+
+    """
+    Muestra todas las imagenes en las diferentes listas
+    """
 
     def display_images(self): # Muestra las imagenes originales y procesadas, incluyendo defectos detectados.
         for data in self.processed_images:
@@ -199,11 +255,19 @@ class ImageProcessor:
 
             plt.show()
 
+    """
+    Limpia TODAS las listas
+    """
+     
     def clear_data(self): # Limpia las listas de imagenes cargadas y procesadas.
         self.images = []
         self.processed_images = []
         self.logger.info("Datos de imagenes limpiados.")
 
+    """
+    Te deja poner la configuracion que ocupes en vez de la establecida
+    """
+    
     def set_config(self, config: ImageProcessorConfig): # Actualiza la configuracion del procesador de imagenes.
         self.config = config
         self.logger.info("Configuracion actualizada.")
