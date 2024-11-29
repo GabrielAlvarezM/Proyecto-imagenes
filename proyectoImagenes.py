@@ -17,10 +17,14 @@ class ImageProcessorConfig:   # Clase base que define configuracion que se aplic
         self.defect_area_threshold = defect_area_threshold
 
 class ImageProcessor:
-    def __init__(self, config: ImageProcessorConfig, image_paths: Optional[List[str]] = None): # Agarra la configuracion y la ruta de las imagenes seleccionadas
+    def __init__(self, config: ImageProcessorConfig): # Agarra la configuracion y la ruta de las imagenes seleccionadas
         # Inicializa el procesador de imagenes con una configuracion y una lista de rutas de imagenes.
+        self.image_paths = [
+            "imagen_1.png",
+            "imagen_2.png",
+            "imagen_3.png"
+        ]
         self.config = config  
-        self.image_paths = image_paths or []
         self.images = []
         self.processed_images = []
         self.logger = self._setup_logger()
@@ -294,16 +298,16 @@ if __name__ == "__main__":
     # processor.add_images_from_directory("ruta/al/directorio/de/imagenes")
 
     # Cargar imagenes
-    # processor.load_images()
+    processor.load_images()
 
     # Procesar imagenes
-    # processor.process_images()
+    processor.process_images()
 
     # Guardar imagenes procesadas
-    # processor.save_images("directorio_de_salida")
+    processor.save_images("directorio_de_salida")
 
     # Generar informe de defectos y guardarlo
-    # processor.save_defect_report("informe_defectos.json")
+    processor.save_defect_report("informe_defectos.json")
 
     # Mostrar imagenes
-    # processor.display_images()
+    processor.display_images()
