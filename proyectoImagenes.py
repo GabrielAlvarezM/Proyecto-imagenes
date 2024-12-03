@@ -251,7 +251,7 @@ class ImageProcessor:
             plt.axis('off')
 
             defect_image = cv.cvtColor(processed, cv.COLOR_GRAY2BGR)
-            cv.drawContours(defect_image, defects, -1, (0, 0, 255), 1)
+            cv.drawContours(defect_image, defects, -1, (255, 0, 0), 1)
             plt.subplot(1, 3, 3)
             plt.imshow(defect_image)
             plt.title('Defectos Detectados')
@@ -310,4 +310,4 @@ if __name__ == "__main__":
     processor.save_defect_report("informe_defectos.json")
 
     # Mostrar imagenes
-    #processor.display_images()
+    processor.display_images()
