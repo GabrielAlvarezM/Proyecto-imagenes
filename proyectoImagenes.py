@@ -310,4 +310,4 @@ if __name__ == "__main__":
     processor.save_defect_report("informe_defectos.json")
 
     # Mostrar imagenes
-    processor.display_images()
+    #processor.display_images()

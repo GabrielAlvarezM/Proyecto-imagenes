@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1, width=device-width">
+    <link rel="stylesheet" href="./global.css" />
+    <link rel="stylesheet" href="./style.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains Mono:wght@400&display=swap" />
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="script.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="imagescontainer">
+            <div class="imagecontainer">
+                <div class="imagen-full-container">Imagen Original</div>
+                <div class="imagen" id="imagenoriginal">
+                </div>
+            </div>
+            <div class="imagecontainer">
+                <div class="imagen-full-container">Imagen Procesada</div>
+                <div class="imagen" id="imagenprocesada">
+                </div>
+            </div>
+        </div>
+        <div class="button-container">
+            <button class="button active" type="button" id="button1" onclick="buttonPress('1')">
+                <span class="button-text">1</span>
+            </button>
+            <button class="button" type="button" id="button2" onclick="buttonPress('2')">
+                <span class="button-text">2</span>
+            </button>
+            <button class="button" type="button" id="button3" onclick="buttonPress('3')">
+                <span class="button-text">3</span>
+            </button>
+        </div>
+    </div>
+</body>
+
+</html>
