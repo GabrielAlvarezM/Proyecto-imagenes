@@ -72,7 +72,7 @@ body {
 }
 
 #imagendefects{
-    background: url('imagen_1_defectos.png') no-repeat center center / cover;
+    background: url('./directorio_de_salida/imagen_1_defects.png') no-repeat center center / cover;
 }
 
 .imagecontainer {

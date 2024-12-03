@@ -18,7 +18,7 @@ function buttonPress(id){
     const toggleButton = document.getElementById("button"+id);
     let imagenoriginal = document.getElementById("imagenoriginal");
     let imagenprocesada = document.getElementById("imagenprocesada");
-    document.getElementById("imagenoriginal");
+    let imagendefectos = document.getElementById("imagendefects");
     
     toggleButton.classList.toggle("active");
     for(let i = 1; i <= nImages; i++){
@@ -30,6 +30,7 @@ function buttonPress(id){
     //toggleButton.textContent = toggleButton.classList.contains("active") ? "ON" : "OFF";
     imagenoriginal.style.background = "url('imagen_"+id+".png') no-repeat center center / cover";
     imagenprocesada.style.background = "url('./directorio_de_salida/imagen_"+id+"_processed.png') no-repeat center center / cover";
+    imagendefectos.style.background = "url('./directorio_de_salida/imagen_"+id+"_defects.png') no-repeat center center / cover";
     console.log("pressed");
 }
 

@@ -194,8 +194,8 @@ class ImageProcessor:
                     self.logger.error(f"Error al guardar la imagen procesada: {output_path}")
                 
                 defect_image = cv.cvtColor(data['processed'], cv.COLOR_GRAY2BGR)
-                cv.drawContours(defect_image, data['defects'], -1, (0, 0, 255), 2)  # Dibujar defectos en rojo
-                output_path_with_contours = os.path.join(output_dir, f"{name}_with_contours{ext}")
+                cv.drawContours(defect_image, data['defects'], -1, (0, 0, 255), 1)  # Dibujar defectos en rojo
+                output_path_with_contours = os.path.join(output_dir, f"{name}_defects{ext}")
                 success = cv.imwrite(output_path_with_contours, defect_image)
                 if success:
                     self.logger.info(f"Imagen con contornos guardada: {output_path_with_contours}")
@@ -319,4 +319,4 @@ if __name__ == "__main__":
     processor.save_defect_report("informe_defectos.json")
 
     # Mostrar imagenes
-    processor.display_images()
+    #processor.display_images()
